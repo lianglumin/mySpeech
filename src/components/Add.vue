@@ -340,11 +340,7 @@
 				</el-table-column>
 			</el-table>
 		</el-form>
-		<el-dialog
-			v-model="recordDialog"
-			@close="closeMicoDia"
-			:before-close="beforeClose"
-		>
+		<el-dialog v-model="recordDialog" @close="closeMicoDia">
 			<el-button @click="startMico" class="operation-button" type="primary"
 				>开始录音</el-button
 			>
@@ -369,12 +365,13 @@
 				type="primary"
 				>翻译</el-button
 			>
-			<el-button
+
+			<!-- <el-button
 				@click="saveTransferMico"
 				class="operation-button"
 				type="success"
 				>保存</el-button
-			>
+			> -->
 
 			<el-input
 				type="textarea"
@@ -431,7 +428,7 @@ export default {
 			drawRecordId: null,
 			formMainData: reactive({
 				////////////////////////////
-				id: 'aaa',
+				// id: 'aaa',
 			}),
 			time: 0,
 			MicoisStop: true,
@@ -439,7 +436,7 @@ export default {
 			organization: reactive([
 				{
 					/////////////////////////////
-					gid: 'SF',
+					// gid: 'SF',
 				},
 			]), //组织
 			mainRules: {
@@ -600,10 +597,14 @@ export default {
 				newobj.isEdit = true;
 				newobj.description = '';
 				newobj.micotime = 0;
+				newobj.id = null;
 				// console.log('newobj',newobj)
 				this.formSubData.push(newobj);
 			} else {
 				this.formSubData.push({
+					///////////////////////
+					id: null,
+					////////////////////////
 					position: '',
 					description: '',
 					recorder: '',
@@ -615,15 +616,12 @@ export default {
 					handleUnit: '',
 					recordPath: '',
 					remark: '',
-					mico: new Recorder({
-						sampleBits: 16,
-						sampleRate: 16000,
-					}),
+					// mico: new Recorder({
+					// 	sampleBits: 16,
+					// 	sampleRate: 16000,
+					// }),
 					isEdit: true,
 					micotime: 0,
-					///////////////////////
-					itemId: null,
-					////////////////////////
 				});
 			}
 			// 聚焦
@@ -673,10 +671,10 @@ export default {
 				this.currentMico.destroy();
 			}
 			this.MicoisStop = false;
-			// this.currentMico = new Recorder({
-			//   sampleBits: 16,
-			//   sampleRate: 16000,
-			// });
+			this.currentMico = new Recorder({
+				sampleBits: 16,
+				sampleRate: 16000,
+			});
 			this.currentStatu = '正在录音';
 			this.currentMico
 				.start()
@@ -730,18 +728,24 @@ export default {
 			formData.append('uploadFile', uploadFile);
 			// console.log('this.currentMicoIndex',this.currentMicoIndex);
 			let nowIndex = this.currentMicoIndex;
-
+			console.log('this.formSubData', this.formSubData);
 			//formData.append('mainDir', window.config.downloadPath)
 			//formData.append('fileName', fileName)
 			//api.uploadWavFile(formData).then(res => {
 			//that.formSubData[this.currentMicoIndex].recordPath = res.data;
 			api
 				// .translate(formData, this.organization.gid, this.formMainData.id)
-				.translate(formData, that.organization.gid, that.formMainData.id)
+				.translate(
+					formData,
+					that.organization.gid,
+					that.formMainData.id,
+					that.formSubData[nowIndex].id
+				)
 				.then((res1) => {
 					// api.translate(formData,'1',this.formMainData.id).then(res1 => {
 					that.formSubData[nowIndex].description = res1.data.description;
 					that.currentMicoDesc = res1.data.description;
+					that.formSubData[nowIndex].id = res1.data.id;
 					// console.log('nowIndex',nowIndex);
 					// console.log('that.currentMicoDesc',that.currentMicoDesc);
 					console.log('that.formSubData', that.formSubData);
@@ -770,7 +774,7 @@ export default {
 			// console.log("保存前的this.formSubData[index]", this.formSubData[index]);
 			// console.log("subData", subData);
 			api
-				.saveSubData(this.formMainData.id, subData)
+				.saveSubData(this.formMainData.id, subData, this.formSubData[index].id)
 				.then((res) => {
 					let obj = res.data;
 					obj.isEdit = false;
@@ -838,7 +842,11 @@ export default {
 					console.log(`${error.name}:${error.message}`);
 				};
 		},
-
+		saveTransferMico() {
+			this.formSubData[this.currentMicoIndex].description =
+				this.currentMicoDesc;
+			ElMessage.success('保存成功！');
+		},
 		//关闭弹窗前
 		// beforeClose(){
 		//   //关闭录音后，停止录制
@@ -848,27 +856,24 @@ export default {
 		// },
 		//关闭录音弹窗
 		closeMicoDia() {
-			if (this.currentMico != null) {
-				// this.currentMico.destroy();
-			}
+			// if (this.currentMico != null) {
+			// 	this.currentMico.destroy();
+			// }
 
 			this.recordDialog = false;
 			// this.time = 0;
 			this.currentStatu = null;
 			this.currentMicoDesc = null;
 			// console.log("this.currentMico close", this.currentMico);
-
+			//调用保存函数，保存语音信息
+			this.saveTransferMico();
 			// this.currentMico = null;
 			console.log(
 				'关闭弹窗：this.formSubData[this.currentMicoIndex].mico',
 				this.formSubData[this.currentMicoIndex].mico
 			);
 		},
-		saveTransferMico() {
-			this.formSubData[this.currentMicoIndex].description =
-				this.currentMicoDesc;
-			ElMessage.success('保存成功！');
-		},
+
 		//添加hotword标签页
 		Addhotword() {
 			this.$emit('addhotword');

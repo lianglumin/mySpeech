@@ -44,11 +44,12 @@ api.saveSubData = function (mainDataId, subData, itemId) {
 //     })
 // }
 
-api.translate = function (uploadFile, gId, mainId) {
+api.translate = function (uploadFile, gId, mainId, itemId) {
 	return axios.post('/translate', uploadFile, {
 		params: {
 			gId: gId,
 			mainId: mainId,
+			id: itemId,
 		},
 	});
 };
