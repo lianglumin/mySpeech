@@ -428,7 +428,7 @@ export default {
 			drawRecordId: null,
 			formMainData: reactive({
 				////////////////////////////
-				id: 'aaa',
+				// id: 'aaa',
 			}),
 			time: 0,
 			MicoisStop: true,
@@ -436,7 +436,7 @@ export default {
 			organization: reactive([
 				{
 					/////////////////////////////
-					gid: 'SF',
+					// gid: 'SF',
 				},
 			]), //组织
 			mainRules: {
