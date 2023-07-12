@@ -428,7 +428,7 @@ export default {
 			drawRecordId: null,
 			formMainData: reactive({
 				////////////////////////////
-				// id: 'aaa',
+				id: 'aaa',
 			}),
 			time: 0,
 			MicoisStop: true,
@@ -436,7 +436,7 @@ export default {
 			organization: reactive([
 				{
 					/////////////////////////////
-					// gid: 'SF',
+					gid: 'SF',
 				},
 			]), //组织
 			mainRules: {
@@ -665,6 +665,35 @@ export default {
 				}
 			});
 		},
+		//关闭弹窗前
+		// beforeClose(){
+		//   //关闭录音后，停止录制
+		//   if(this.MicoisStop==false){
+		//     this.stopMico();
+		//   }
+		// },
+		//关闭录音弹窗
+		closeMicoDia() {
+			// if (this.currentMico != null) {
+			// 	this.currentMico.destroy();
+			// }
+
+			this.recordDialog = false;
+			// this.time = 0;
+			this.currentStatu = null;
+
+			this.formSubData[this.currentMicoIndex].description =
+				this.currentMicoDesc;
+			// this.currentMicoDesc = null;
+			// console.log("this.currentMico close", this.currentMico);
+			//调用保存函数，保存语音信息
+			this.saveTransferMico();
+			// this.currentMico = null;
+			console.log(
+				'关闭弹窗：this.formSubData[this.currentMicoIndex].mico',
+				this.formSubData[this.currentMicoIndex].mico
+			);
+		},
 		/** 设置录音*/
 		startMico() {
 			if (this.currentMico != null) {
@@ -718,6 +747,7 @@ export default {
 			if (index !== '') {
 				this.currentMicoIndex = index;
 			}
+			let nowIndex = this.currentMicoIndex;
 			let date = new Date();
 			// let fileName = this.formMainData.id + '-' + this.currentMicoIndex + '.wav';
 			let fileName = date.getTime() + '.wav';
@@ -726,8 +756,9 @@ export default {
 			let wavBlob = this.formSubData[this.currentMicoIndex].mico.getWAVBlob();
 			let uploadFile = new File([wavBlob], fileName, { type: 'audio/wav' });
 			formData.append('uploadFile', uploadFile);
+			formData.append('id', this.formSubData[nowIndex].id);
 			// console.log('this.currentMicoIndex',this.currentMicoIndex);
-			let nowIndex = this.currentMicoIndex;
+
 			console.log('this.formSubData', this.formSubData);
 			//formData.append('mainDir', window.config.downloadPath)
 			//formData.append('fileName', fileName)
@@ -735,12 +766,7 @@ export default {
 			//that.formSubData[this.currentMicoIndex].recordPath = res.data;
 			api
 				// .translate(formData, this.organization.gid, this.formMainData.id)
-				.translate(
-					formData,
-					that.organization.gid,
-					that.formMainData.id,
-					that.formSubData[nowIndex].id
-				)
+				.translate(formData, that.organization.gid, that.formMainData.id)
 				.then((res1) => {
 					// api.translate(formData,'1',this.formMainData.id).then(res1 => {
 					that.formSubData[nowIndex].description = res1.data.description;
@@ -769,12 +795,13 @@ export default {
 					description: row.description, //故障描述
 					remark: row.remark, //备注
 					recordPath: row.recordPath, //语音存储路径
+					id: row.id, //id
 				},
 			];
 			// console.log("保存前的this.formSubData[index]", this.formSubData[index]);
 			// console.log("subData", subData);
 			api
-				.saveSubData(this.formMainData.id, subData, this.formSubData[index].id)
+				.saveSubData(this.formMainData.id, subData)
 				.then((res) => {
 					let obj = res.data;
 					obj.isEdit = false;
@@ -846,32 +873,6 @@ export default {
 			this.formSubData[this.currentMicoIndex].description =
 				this.currentMicoDesc;
 			ElMessage.success('保存成功！');
-		},
-		//关闭弹窗前
-		// beforeClose(){
-		//   //关闭录音后，停止录制
-		//   if(this.MicoisStop==false){
-		//     this.stopMico();
-		//   }
-		// },
-		//关闭录音弹窗
-		closeMicoDia() {
-			// if (this.currentMico != null) {
-			// 	this.currentMico.destroy();
-			// }
-
-			this.recordDialog = false;
-			// this.time = 0;
-			this.currentStatu = null;
-			this.currentMicoDesc = null;
-			// console.log("this.currentMico close", this.currentMico);
-			//调用保存函数，保存语音信息
-			this.saveTransferMico();
-			// this.currentMico = null;
-			console.log(
-				'关闭弹窗：this.formSubData[this.currentMicoIndex].mico',
-				this.formSubData[this.currentMicoIndex].mico
-			);
 		},
 
 		//添加hotword标签页

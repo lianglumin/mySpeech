@@ -29,11 +29,10 @@ api.saveMainData = function (mainData) {
 };
 
 //////////
-api.saveSubData = function (mainDataId, subData, itemId) {
+api.saveSubData = function (mainDataId, subData) {
 	return axios.post('/saveDetailsInfo', subData, {
 		params: {
 			pid: mainDataId,
-			id: itemId,
 		},
 	});
 };
@@ -44,12 +43,11 @@ api.saveSubData = function (mainDataId, subData, itemId) {
 //     })
 // }
 
-api.translate = function (uploadFile, gId, mainId, itemId) {
+api.translate = function (uploadFile, gId, mainId) {
 	return axios.post('/translate', uploadFile, {
 		params: {
 			gId: gId,
 			mainId: mainId,
-			id: itemId,
 		},
 	});
 };
@@ -58,18 +56,18 @@ api.searchMainData = function (mainData) {
 	return axios.post('/search', mainData);
 };
 
-api.searchSubData = function (id) {
+api.searchSubData = function (pid) {
 	return axios.post('/showDetial', '', {
 		params: {
-			pid: id,
+			pid: pid,
 		},
 	});
 };
 
-api.delSubData = function (id) {
+api.delSubData = function (deleteId) {
 	return axios.post('/deleteDetailsInfo', '', {
 		params: {
-			id: id,
+			id: deleteId,
 		},
 	});
 };
